@@ -1,0 +1,182 @@
+{
+  "name": "Email Filter and reply agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "caeede29-ebd2-4ab1-9b18-891565b0ee79",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "labelIds": [
+            "UNREAD"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "95080983-1f23-44c9-96ad-f85365f6a311",
+      "name": "Get All mail",
+      "webhookId": "138c623f-299c-4c6b-92eb-5602d2573004",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Mip1dyMr6rF6rTjp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.threadId }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "a586944b-518d-43d4-ad98-ef38b28b8cc3",
+      "name": "Get all details",
+      "webhookId": "775e85d4-628c-435d-9db1-35d4a917d61a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Mip1dyMr6rF6rTjp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I want you to draft an email reply in a very professional way. Some thingd to know I am right now not open fpr promotions or  collaborations but I am open for meetings and project discussion as well.\n\nI want you to reply on this email : {{ $json.text }}\n\ni want to you to draft the reply and give me only the body. I don't want to give me anything jsut give me body text.\n\nMy name is Bittu.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        656,
+        0
+      ],
+      "id": "77ec3bfe-0375-4cc8-b2a4-dbd9ab74511d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        208
+      ],
+      "id": "b162fe27-2ac4-4cfe-9cd7-4ea8a8f21ca6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "5otaNgAqqiWGKTQk",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get All mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All mail": {
+      "main": [
+        [
+          {
+            "node": "Get all details",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all details": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f5ae8d64-c40f-410c-8e41-f59e760f1cb0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2546ef4d10d427f26bd69e83e34873a360738b83a0232de21879a98be154bacb"
+  },
+  "id": "FZ0cTHOmnnkTlBi89m-Wm",
+  "tags": []
+}
